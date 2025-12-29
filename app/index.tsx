@@ -24,7 +24,7 @@ export default function Index() {
     >
       <Text
         style={{
-          fontSize: 24,
+          fontSize: 22,
           marginBottom: 16,
         }}
       >
