@@ -1,51 +1,36 @@
 // app/index.tsx
+// Root redirect - sends users to the appropriate starting point.
 
-import React, { useState } from 'react';
-import { Button, Text, View } from 'react-native';
+import { useEffect } from 'react';
+import { useRouter } from 'expo-router';
+import { View, StyleSheet } from 'react-native';
+import { useCompanionStore } from '../src/stores/companionStore';
+import { baseTheme } from '../src/theme';
 
-// This component is the home screen for the app on web.
 export default function Index() {
-  // STATE: has the user tapped the button yet?
-  const [hasStarted, setHasStarted] = useState(false);
+  const router = useRouter();
+  const { hasCompletedOnboarding } = useCompanionStore();
 
-  // EVENT HANDLER: runs when the button is pressed
-  const handleStartPress = () => {
-    setHasStarted(true); // triggers a re-render with hasStarted = true
-  };
+  useEffect(() => {
+    // Small delay to prevent flash
+    const timer = setTimeout(() => {
+      if (hasCompletedOnboarding) {
+        router.replace('/conversation' as any);
+      } else {
+        router.replace('/welcome' as any);
+      }
+    }, 100);
 
-  // JSX: what the UI should look like *right now* given the state.
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        padding: 24,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 22,
-          marginBottom: 16,
-        }}
-      >
-        {hasStarted ? 'Welcome back to Lumen.' : 'Hey. This is Lumen.'}
-      </Text>
+    return () => clearTimeout(timer);
+  }, [hasCompletedOnboarding, router]);
 
-      <Text
-        style={{
-          fontSize: 16,
-          marginBottom: 24,
-        }}
-      >
-        {hasStarted
-          ? 'We’ll pick up from wherever your questions left off last time.'
-          : 'This is where your questions start getting turned into something real.'}
-      </Text>
-
-      {/* Only show the button until the user has started */}
-      {!hasStarted && (
-        <Button title="Start exploring" onPress={handleStartPress} />
-      )}
-    </View>
-  );
+  // Show blank screen with matching background during redirect
+  return <View style={styles.container} />;
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: baseTheme.colors.paper,
+  },
+});
